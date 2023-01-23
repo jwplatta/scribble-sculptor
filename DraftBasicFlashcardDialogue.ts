@@ -50,11 +50,11 @@ export class DraftBasicFlashcardDialogue extends Modal {
 
   onOpen(): void {
     const { contentEl } = this;
+    contentEl.setAttr("class", "scribble-sculptor-modal");
 
-    const mainDiv = contentEl.createDiv();
-    mainDiv.createEl("h2", { text: "Selected Text" });
+    contentEl.createEl("h2", { text: "Selected Text" });
 
-    const selectedTextInput = new TextAreaComponent(mainDiv);
+    const selectedTextInput = new TextAreaComponent(contentEl);
     selectedTextInput.setValue(this.sourceText);
     selectedTextInput.inputEl.style.width = "100%";
     selectedTextInput.inputEl.style.height = "10rem";
@@ -62,7 +62,7 @@ export class DraftBasicFlashcardDialogue extends Modal {
       this.sourceText = value;
     });
 
-    const keywordsTextInput = new TextComponent(mainDiv)
+    const keywordsTextInput = new TextComponent(contentEl)
     keywordsTextInput.setPlaceholder("Enter focus keywords...")
     keywordsTextInput.then((cb) => {
       cb.inputEl.setAttr("style", "margin-top: 5px; width: 100%;");
@@ -71,7 +71,7 @@ export class DraftBasicFlashcardDialogue extends Modal {
       this.keywords = value;
     });
 
-    const draftQuestionButtonDiv = mainDiv.createDiv();
+    const draftQuestionButtonDiv = contentEl.createDiv();
 		draftQuestionButtonDiv.setAttr("style", "margin-top: 5px;")
 
     const draftQuestionButton = new ButtonComponent(draftQuestionButtonDiv);
@@ -102,9 +102,9 @@ export class DraftBasicFlashcardDialogue extends Modal {
 			});
     });
 
-		mainDiv.createEl("hr");
-    mainDiv.createEl("h2", { text: "Question" });
-    const draftedQuestionText = new TextAreaComponent(mainDiv);
+		contentEl.createEl("hr");
+    contentEl.createEl("h2", { text: "Question" });
+    const draftedQuestionText = new TextAreaComponent(contentEl);
     draftedQuestionText.setDisabled(true);
     draftedQuestionText.then((cb) => {
       cb.inputEl.setAttr("style", "margin-top: 5px; width: 100%; height: 10rem;");
@@ -113,7 +113,7 @@ export class DraftBasicFlashcardDialogue extends Modal {
 			this.questionText = value;
 		});
 
-    const draftFlashcardButtonDiv = mainDiv.createDiv();
+    const draftFlashcardButtonDiv = contentEl.createDiv();
 		draftFlashcardButtonDiv.setAttr("style", "margin-top: 5px;")
 
     const draftFlashcardButton = new ButtonComponent(draftFlashcardButtonDiv);
@@ -146,18 +146,16 @@ export class DraftBasicFlashcardDialogue extends Modal {
       }
     });
 
-    mainDiv.createEl("hr");
-    mainDiv.createEl("h2", { text: "Basic Flashcard" });
-    const draftedFlashcardText = new TextAreaComponent(mainDiv);
+    contentEl.createEl("hr");
+    contentEl.createEl("h2", { text: "Basic Flashcard" });
+    const draftedFlashcardText = new TextAreaComponent(contentEl);
     draftedFlashcardText.setDisabled(true);
     draftedFlashcardText.then((cb) => {
       cb.inputEl.setAttr("style", "margin-top: 5px; width: 100%; height: 20rem;");
     });
 		draftedFlashcardText.onChange((value) => {
-			this.questionText = value;
+			this.flashcard = value;
 		});
-
-    // END
 
     const useButtonDiv = contentEl.createDiv();
     useButtonDiv.setAttr("style", "padding-top: 5px;");

@@ -26,12 +26,12 @@ export class InputInstructionDialogue extends Modal {
   }
 
 	onOpen() {
-		const {contentEl} = this;
+		const { contentEl } = this;
+    contentEl.setAttr("class", "scribble-sculptor-modal");
 
-    const mainDiv = contentEl.createDiv();
-    mainDiv.createEl("h2", { text: "Selected Text" });
+    contentEl.createEl("h2", { text: "Selected Text" });
 
-    const selectedTextInput = new TextAreaComponent(mainDiv);
+    const selectedTextInput = new TextAreaComponent(contentEl);
     selectedTextInput.setValue(this.sourceText);
     selectedTextInput.inputEl.style.width = "100%";
     selectedTextInput.inputEl.style.height = "10rem";
@@ -39,10 +39,10 @@ export class InputInstructionDialogue extends Modal {
       this.sourceText = value;
     });
 
-    mainDiv.createEl("hr");
-    mainDiv.createEl("p", { text: "What do you want to do with the selected text?"})
+    contentEl.createEl("hr");
+    contentEl.createEl("p", { text: "What do you want to do with the selected text?"})
 
-    const instructionTextArea = new TextAreaComponent(mainDiv);
+    const instructionTextArea = new TextAreaComponent(contentEl);
     instructionTextArea.inputEl.style.width = "100%";
     instructionTextArea.inputEl.style.height = "10rem";
 
@@ -50,7 +50,7 @@ export class InputInstructionDialogue extends Modal {
       this.instructionText = value;
     })
 
-    const applyButtonDiv = mainDiv.createDiv();
+    const applyButtonDiv = contentEl.createDiv();
     applyButtonDiv.setAttr("style", "margin-top: 5px;");
 
     const applyButton = new ButtonComponent(applyButtonDiv);
@@ -74,10 +74,10 @@ export class InputInstructionDialogue extends Modal {
       }
     });
 
-    mainDiv.createEl("hr");
-    mainDiv.createEl("h2", { text: "Result" });
+    contentEl.createEl("hr");
+    contentEl.createEl("h2", { text: "Result" });
 
-    const transformedTextInput = new TextAreaComponent(mainDiv);
+    const transformedTextInput = new TextAreaComponent(contentEl);
     transformedTextInput.setDisabled(true);
     transformedTextInput.then((cb) => {
       cb.inputEl.setAttr("style", "margin-top: 5px; width: 100%; height: 10rem;");
@@ -86,7 +86,7 @@ export class InputInstructionDialogue extends Modal {
       this.transformedText = value;
     });
 
-    const useButtonDiv = mainDiv.createDiv();
+    const useButtonDiv = contentEl.createDiv();
     useButtonDiv.setAttr("style", "padding-top: 5px;");
 
     const useButton = new ButtonComponent(useButtonDiv);

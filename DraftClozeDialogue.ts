@@ -33,12 +33,11 @@ export class DraftClozeDialogue extends Modal {
 
 	onOpen() {
 		const { contentEl } = this;
+		contentEl.setAttr("class", "scribble-sculptor-modal");
 
-		const mainDiv = contentEl.createDiv();
+		contentEl.createEl("h2", { text: "Selected Text" });
 
-		mainDiv.createEl("h2", { text: "Selected Text" });
-
-		const selectedTextInput = new TextAreaComponent(mainDiv);
+		const selectedTextInput = new TextAreaComponent(contentEl);
 		selectedTextInput.setValue(this.sourceText);
 		selectedTextInput.inputEl.style.width = "100%";
     selectedTextInput.inputEl.style.height = "10rem";
@@ -46,7 +45,7 @@ export class DraftClozeDialogue extends Modal {
 			this.sourceText = value;
 		});
 
-		const keywordsTextInput = new TextComponent(mainDiv)
+		const keywordsTextInput = new TextComponent(contentEl)
     keywordsTextInput.setPlaceholder("Enter keywords to focus on...")
     keywordsTextInput.then((cb) => {
       cb.inputEl.setAttr("style", "margin-top: 5px; width: 100%;");
@@ -55,7 +54,7 @@ export class DraftClozeDialogue extends Modal {
       this.keywords = value;
     });
 
-		const draftButtonDiv = mainDiv.createDiv();
+		const draftButtonDiv = contentEl.createDiv();
 		draftButtonDiv.setAttr("style", "margin-top: 5px;")
 
     const draftButton = new ButtonComponent(draftButtonDiv);
@@ -76,10 +75,10 @@ export class DraftClozeDialogue extends Modal {
 			});
     });
 
-		mainDiv.createEl("hr");
-    mainDiv.createEl("h2", { text: "Cloze Flashcard" });
+		contentEl.createEl("hr");
+    contentEl.createEl("h2", { text: "Cloze Flashcard" });
 
-		const draftedClozeText = new TextAreaComponent(mainDiv);
+		const draftedClozeText = new TextAreaComponent(contentEl);
 		draftedClozeText.then((cb) => {
       cb.inputEl.setAttr("style", "margin-top: 5px; width: 100%; height: 10rem;");
     })
@@ -87,7 +86,7 @@ export class DraftClozeDialogue extends Modal {
 			this.draftedCloze = value;
 		})
 
-		const useButtonDiv = mainDiv.createDiv();
+		const useButtonDiv = contentEl.createDiv();
 		useButtonDiv.setAttr("style", "margin-top: 5px;");
 
 		const useButton = new ButtonComponent(useButtonDiv)

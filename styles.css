@@ -6,3 +6,10 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+.scribble-sculptor-modal {
+  overflow: scroll;
+  overflow-x: auto;
+  overflow-y: auto;
+  padding-right: 10px;
+}
