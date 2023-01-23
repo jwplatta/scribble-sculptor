@@ -1,0 +1,11 @@
+{
+	"id": "scribble-sculptor",
+	"name": "Scribble Sculptor",
+	"version": "0.1.0",
+	"minAppVersion": "0.15.0",
+	"description": "A set of writing tools using OpenAI's API.",
+	"author": "Joseph Platta <jwplatta@gmail.com>",
+	"authorUrl": "https://obsidian.md",
+	"fundingUrl": "https://obsidian.md/pricing",
+	"isDesktopOnly": false
+}
