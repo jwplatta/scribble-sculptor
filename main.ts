@@ -1,14 +1,16 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, Setting } from 'obsidian';
 import { ScribbleSculptorSettingTab } from 'ScribbleSculptorSettingTab';
-import { SampleModal } from 'modals';
 // import { DraftClozeKeywordsModal } from 'DraftCloze';
 import { DraftClozeDialogue } from 'DraftClozeDialogue';
 // import { DraftBasicFlashcardKeywordsModal } from 'DraftBasicFlashcard';
 import { DraftBasicFlashcardDialogue } from 'DraftBasicFlashcardDialogue';
-// import { InputInstructionModal } from 'InputInstructionModal';
+import { InputInstructionModal } from 'InputInstructionModal';
 import { NoSelectionModal } from 'NoSelectionModal';
 import { OpenAITextCompletion } from 'OpenAITextCompletion';
 import { InputInstructionDialogue } from 'InputInstructionDialogue';
+import { GenerateIdeasModal } from 'GenerateIdeasModal';
+import { OpenAIModels } from 'OpenAIModels';
+import { ExecuteGPTPromptDialogue } from 'ExecuteGPTPromptDialogue';
 // const { Configuration, OpenAIApi } = require("openai");
 
 // Remember to rename these classes and interfaces!
@@ -93,56 +95,6 @@ export default class ScribbleSculptor extends Plugin {
 	// 	}
 	// }
 
-	async summarizeText(text: string) {
-		const prompt = `
-		Write a summary of the text.
-
-		Text:
-		"""
-		${text.trim()}
-		"""
-
-		Summary:`.trim();
-
-		const summary = await this.openaiTextCompletion(prompt);
-
-		return summary;
-	}
-
-	async createQuestion(text: string) {
-		const prompt = `
-		Write a question about the key concepts in the text.
-		text:
-		"""
-		${text.trim()}
-		"""
-		question:
-		`.trim();
-
-		const question = await this.openaiTextCompletion(prompt);
-
-		return question;
-	}
-
-	async createAnswer(question: string, text: string) {
-		const prompt = `
-		Use the text to write a short answer to the question.
-
-		question:
-		"""
-		${question}
-		"""
-		text:
-		"""
-		${text}
-		"""
-		answer:`.trim();
-
-		const answer = await this.openaiTextCompletion(prompt);
-
-		return answer;
-	}
-
 	async onload() {
 		await this.loadSettings();
 
@@ -165,18 +117,6 @@ export default class ScribbleSculptor extends Plugin {
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
 		statusBarItemEl.setText('Status Bar Text');
-
-		this.addCommand({
-			id: 'test-command',
-			name: 'Test Command',
-			callback: () => {
-				const text_completion = new OpenAITextCompletion(this.settings.openAIKey)
-
-				text_completion.test('bar foo bar').then((prompt) => {
-					console.log(prompt);
-				})
-			}
-		})
 
 		this.addCommand({
 			id: 'summarize-text',
@@ -224,14 +164,27 @@ export default class ScribbleSculptor extends Plugin {
 		});
 
 		this.addCommand({
-			id: 'text-instruction',
-			name: 'Instruct Text',
+			id: 'text-instruct',
+			name: 'Text Instruct',
+			editorCallback: (editor: Editor) => {
+				const selection = editor.getSelection();
+
+				if (selection) {
+					new InputInstructionModal(this.app, editor, selection, new OpenAITextCompletion(this.settings.openAIKey)).open()
+				} else {
+					new NoSelectionModal(this.app).open()
+				}
+			}
+		})
+
+		this.addCommand({
+			id: 'text-instruction-dialogue',
+			name: 'Text Instruct Dialogue',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				const selection = editor.getSelection();
 
 				if (selection) {
-					// new InputInstructionModal(this.app, editor, selection, new OpenAITextCompletion(this.settings.openAIKey)).open();
-					new InputInstructionDialogue(this.app, editor, selection, new OpenAITextCompletion(this.settings.openAIKey)).open()
+					new InputInstructionDialogue(this.app, editor, selection, new OpenAITextCompletion(this.settings.openAIKey)).open();
 				} else {
 					new NoSelectionModal(this.app).open()
 				}
@@ -239,8 +192,16 @@ export default class ScribbleSculptor extends Plugin {
 		});
 
 		this.addCommand({
-			id: 'create-cloze-flashcard',
-			name: 'Create Cloze Flashcard',
+			id: 'generate-ideas-modal',
+			name: 'Generate Ideas',
+			editorCallback: (editor: Editor) => {
+				new GenerateIdeasModal(this.app, editor, new OpenAITextCompletion(this.settings.openAIKey)).open();
+			}
+		});
+
+		this.addCommand({
+			id: 'create-cloze-flashcard-dialogue',
+			name: 'Create Cloze Flashcard Dialogue',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				const selection = editor.getSelection();
 
@@ -253,8 +214,8 @@ export default class ScribbleSculptor extends Plugin {
 		});
 
 		this.addCommand({
-			id: 'create-basic-flashcard',
-			name: 'Create Basic Flashcard',
+			id: 'create-basic-flashcard-dialogue',
+			name: 'Create Basic Flashcard Dialogue',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				const selection = editor.getSelection();
 
@@ -264,7 +225,50 @@ export default class ScribbleSculptor extends Plugin {
 					new NoSelectionModal(this.app).open()
 				}
 			}
-		})
+		});
+
+		this.addCommand({
+			id: 'execute-gpt-prompt',
+			name: 'Execute GPT Prompt',
+			editorCallback: (editor: Editor) => {
+				const prompt = editor.getSelection();
+
+				if (prompt) {
+					const textCompletion = new OpenAITextCompletion(this.settings.openAIKey)
+					textCompletion.post(prompt).then((completion) => {
+						editor.replaceRange(completion.trim(), editor.getCursor());
+					})
+				} else {
+					new NoSelectionModal(this.app).open();
+				}
+			}
+		});
+
+		this.addCommand({
+			id: 'execute-gpt-prompt-dialogue',
+			name: 'Execute GPT Prompt Dialogue',
+			editorCallback: (editor: Editor) => {
+				// new OpenAITextCompletion(this.settings.openAIKey)
+				console.log(new OpenAIModels(this.settings.openAIKey).get());
+				const prompt = editor.getSelection();
+
+				new ExecuteGPTPromptDialogue(this.app, editor, prompt, new OpenAIModels(this.settings.openAIKey), new OpenAITextCompletion(this.settings.openAIKey)).open();
+			}
+		});
+
+
+
+		// this.addCommand({
+		// 	id: 'test-command',
+		// 	name: 'Test Command',
+		// 	callback: () => {
+		// 		const text_completion = new OpenAITextCompletion(this.settings.openAIKey)
+
+		// 		text_completion.test('bar foo bar').then((prompt) => {
+		// 			console.log(prompt);
+		// 		})
+		// 	}
+		// })
 
 		// This adds an editor command that can perform some operation on the current editor instance
 		// this.addCommand({
@@ -277,24 +281,24 @@ export default class ScribbleSculptor extends Plugin {
 		// });
 
 		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
+		// this.addCommand({
+		// 	id: 'open-sample-modal-complex',
+		// 	name: 'Open sample modal (complex)',
+		// 	checkCallback: (checking: boolean) => {
+		// 		// Conditions to check
+		// 		const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
+		// 		if (markdownView) {
+		// 			// If checking is true, we're simply "checking" if the command can be run.
+		// 			// If checking is false, then we want to actually perform the operation.
+		// 			if (!checking) {
+		// 				new SampleModal(this.app).open();
+		// 			}
 
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-			}
-		});
+		// 			// This command will only show up in Command Palette when the check function returns true
+		// 			return true;
+		// 		}
+		// 	}
+		// });
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new ScribbleSculptorSettingTab(this.app, this));
@@ -312,66 +316,66 @@ export default class ScribbleSculptor extends Plugin {
 	}
 }
 
-class NewDraftModal extends Modal {
-	result: string;
-	onSubmit: (result: string) => void;
+// class NewDraftModal extends Modal {
+// 	result: string;
+// 	onSubmit: (result: string) => void;
 
-	constructor(app: App, onSubmit: (result: string) => void) {
-		super(app);
-		this.onSubmit = onSubmit;
-		this.modalEl.style.width = "100%";
-	}
+// 	constructor(app: App, onSubmit: (result: string) => void) {
+// 		super(app);
+// 		this.onSubmit = onSubmit;
+// 		this.modalEl.style.width = "100%";
+// 	}
 
-	onOpen() {
-		const { contentEl } = this;
-		contentEl.createEl("h1", { text: "Enter a prompt" });
+// 	onOpen() {
+// 		const { contentEl } = this;
+// 		contentEl.createEl("h1", { text: "Enter a prompt" });
 
-		new Setting(contentEl)
-			.addSlider((sl) =>
-				sl.setLimits(0, 1, 0.1)
-					.then((cb) => {
-						cb.setValue(0.5);
-					})
-			)
-			.addDropdown((dd) =>
-				dd.addOption('foo' , 'foo')
-					.addOption('bar' , 'bar')
-					// .then((cb) => {
-					// 	cb.selectEl.style.float = 'left';
-					// })
-			)
-			.addTextArea((text) =>
-				text
-					.onChange((value) => {
-						this.result = value;
-					})
-					.then((cb) => {
-						cb.inputEl.style.marginLeft = 'auto';
-						cb.inputEl.style.marginRight = 'auto';
-						cb.inputEl.style.display = 'block';
-						cb.inputEl.style.width = '100%';
-						cb.inputEl.rows = 30;
-					})
-			);
+// 		new Setting(contentEl)
+// 			.addSlider((sl) =>
+// 				sl.setLimits(0, 1, 0.1)
+// 					.then((cb) => {
+// 						cb.setValue(0.5);
+// 					})
+// 			)
+// 			.addDropdown((dd) =>
+// 				dd.addOption('foo' , 'foo')
+// 					.addOption('bar' , 'bar')
+// 					// .then((cb) => {
+// 					// 	cb.selectEl.style.float = 'left';
+// 					// })
+// 			)
+// 			.addTextArea((text) =>
+// 				text
+// 					.onChange((value) => {
+// 						this.result = value;
+// 					})
+// 					.then((cb) => {
+// 						cb.inputEl.style.marginLeft = 'auto';
+// 						cb.inputEl.style.marginRight = 'auto';
+// 						cb.inputEl.style.display = 'block';
+// 						cb.inputEl.style.width = '100%';
+// 						cb.inputEl.rows = 30;
+// 					})
+// 			);
 
-		new Setting(contentEl)
-			.addButton((btn) =>
-				btn
-					.setButtonText("Save")
-					.setCta()
-					.onClick(() => {
-						this.close();
-						this.onSubmit(this.result);
-					}
-				)
-			);
-	}
+// 		new Setting(contentEl)
+// 			.addButton((btn) =>
+// 				btn
+// 					.setButtonText("Save")
+// 					.setCta()
+// 					.onClick(() => {
+// 						this.close();
+// 						this.onSubmit(this.result);
+// 					}
+// 				)
+// 			);
+// 	}
 
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
-	}
-}
+// 	onClose() {
+// 		const {contentEl} = this;
+// 		contentEl.empty();
+// 	}
+// }
 
 // class ScribbleSculptorSettingTab extends PluginSettingTab {
 // 	plugin: ScribbleSculptor;
