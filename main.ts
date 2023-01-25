@@ -120,7 +120,7 @@ export default class ScribbleSculptor extends Plugin {
 
 		this.addCommand({
 			id: 'summarize-text',
-			name: 'Summarize Text',
+			name: 'Summarize',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				const selection = editor.getSelection();
 
@@ -145,7 +145,7 @@ export default class ScribbleSculptor extends Plugin {
 
 		this.addCommand({
 			id: 'text-to-bullet-points',
-			name: 'Text to Bullets Points',
+			name: 'Make Bullets Points',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				const selection = editor.getSelection();
 
@@ -200,8 +200,8 @@ export default class ScribbleSculptor extends Plugin {
 		});
 
 		this.addCommand({
-			id: 'create-cloze-flashcard-dialogue',
-			name: 'Create Cloze Flashcard Dialogue',
+			id: 'write-cloze-flashcard-dialogue',
+			name: 'Write Cloze Flashcard Dialogue',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				const selection = editor.getSelection();
 
@@ -214,8 +214,8 @@ export default class ScribbleSculptor extends Plugin {
 		});
 
 		this.addCommand({
-			id: 'create-basic-flashcard-dialogue',
-			name: 'Create Basic Flashcard Dialogue',
+			id: 'write-basic-flashcard-dialogue',
+			name: 'Write Basic Flashcard Dialogue',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				const selection = editor.getSelection();
 
